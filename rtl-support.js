@@ -5,31 +5,49 @@ var isRTL = function(str) {
 	return RTL_REGEX.test(str);
 };
 
-var msgInputElement = $('#msg_input');
+var msgInputElement = document.getElementById('msg_input');
 
 var rtlifyInput = (function(e) {
-	if (isRTL($(this).val())) {
-		$(this).css('direction', 'rtl').css('text-align', 'left');
-	} else {
-		$(this).css('direction', 'ltr');
+	if (isRTL(this.value)) {
+		this.classList.add('slack-rtl');
 	}
 }).bind(msgInputElement);
 
 // Minor timeout for when the paste event triggers before the text is available
-msgInputElement.on('input keyup change propertychange paste', function() { setTimeout(rtlifyInput, 20); });
+var timeoutRtlifyFunc = function() { setTimeout(rtlifyInput, 20); };
+msgInputElement.oninput = msgInputElement.onkeyup = msgInputElement.onpaste = msgInputElement.onchange = msgInputElement.onpropertychange = timeoutRtlifyFunc;
 
 var rtlifyMessages = function () {
-	$('.message_body').each(function(idx, msg) {
-		if (isRTL($(msg).text())) {
-			$(msg).css('direction', 'rtl').css('text-align', 'left');
-		}
+	var messages = document.getElementsByClassName('message_body');
+	messages = Array.prototype.filter.call(messages, function(message) {
+		return (!message.classList.contains('slack-rtl')) && (!message.classList.contains('slack-ltr'));
 	});
+
+	for (var i=0; i<messages.length; ++i) {
+		var message = messages[i];
+		message.classList.add(isRTL(message.innerText) ? 'slack-rtl' : 'slack-ltr');
+	}
 };
 
-$("#msgs_div").bind("DOMSubtreeModified", rtlifyMessages);
+var target = document.getElementById('msgs_div');
+var observer = new MutationObserver(function(mutations) {
+ 	mutations = mutations.filter(function(mutation) { 
+ 		return mutation.type === 'childList' && mutation.addedNodes && mutation.addedNodes.length > 0
+ 				&& Array.prototype.filter.call(mutation.addedNodes, function(node) {
+ 					return node.classList && (node.classList.contains('message') || node.classList.contains('day_container'));
+ 				}).length > 0;
+ 	});
+
+ 	if (mutations.length > 0) {
+ 		rtlifyMessages();
+ 	}    
+});
+ 
+var config = { attributes: false, childList: true, characterData: false, subtree: true };
+observer.observe(target, config);
 
 // It takes some time for previous entered text to load
 setTimeout(function() {
 	rtlifyMessages();
-	msgInputElement.trigger('change');
+	msgInputElement.onchange();
 }, 1000);
