@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "Slack RTL support script",
+  "description": "Basic RTL support for slack",
+  "version": "1.0",
+  "permissions": [
+    "activeTab",
+    "*://*.slack.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.slack.com/*"],
+      "js": ["jquery-3.1.1.min.js", "rtl-support.js"]
+    }
+  ]
+}
