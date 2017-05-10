@@ -1,3 +1,14 @@
+chrome.storage.sync.get({interfaceStyle: 'rtl-support-clean.css'},
+  function(items) {
+	var url = chrome.extension.getURL(items.interfaceStyle)
+	console.log("Injecting RTL CSS: " + url);
+	var fileref = document.createElement("link");
+	fileref.setAttribute("rel", "stylesheet");
+	fileref.setAttribute("type", "text/css");
+	fileref.setAttribute("href", url);
+	document.getElementsByTagName("head")[0].appendChild(fileref);
+});
+  
 var RTL_CHARACTERS = '\u0591-\u07FF\u200F\u202B\u202E\uFB1D-\uFDFD\uFE70-\uFEFC';
 var RTL_REGEX = new RegExp('^[^'+RTL_CHARACTERS+']*?['+RTL_CHARACTERS+']');
 
