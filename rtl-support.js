@@ -5,11 +5,13 @@ var isRTL = function(str) {
 	return RTL_REGEX.test(str);
 };
 
-var msgInputElement = document.getElementById('msg_input');
+var msgInputElement = document.querySelector('#msg_input .ql-editor') || document.querySelector('#msg_input');
 
 var rtlifyInput = (function(e) {
-	if (isRTL(this.value)) {
+	if (isRTL(this.value || this.innerText)) {
 		this.classList.add('slack-rtl');
+	} else {
+		this.classList.remove('slack-rtl');
 	}
 }).bind(msgInputElement);
 
@@ -29,6 +31,11 @@ var rtlifyMessages = function () {
 	}
 };
 
+var scrollToBottom = function() {
+	var scrollerDiv = document.getElementById("msgs_scroller_div");
+	scrollerDiv.scrollTop = scrollerDiv.scrollHeight;
+}
+
 var target = document.getElementById('msgs_div');
 var observer = new MutationObserver(function(mutations) {
  	mutations = mutations.filter(function(mutation) { 
@@ -40,14 +47,27 @@ var observer = new MutationObserver(function(mutations) {
 
  	if (mutations.length > 0) {
  		rtlifyMessages();
- 	}    
+ 		setTimeout(function() {
+	 		scrollToBottom();
+ 		}, 800);
+ 	} 
 });
  
-var config = { attributes: false, childList: true, characterData: false, subtree: true };
+var config = { attributes: true, childList: true, characterData: true, subtree: true };
 observer.observe(target, config);
+
+var msgInputObserver = new MutationObserver(function(mutations) {
+	mutations = mutations.filter(function(mutation) { 
+		return (mutation.type === 'attributes' && mutation.attributeName !== 'class') || (mutation.type === 'characterData');
+	})
+	if (mutations.length > 0) {
+		msgInputElement.onchange();
+	}
+});
 
 // It takes some time for previous entered text to load
 setTimeout(function() {
 	rtlifyMessages();
 	msgInputElement.onchange();
-}, 1000);
+	msgInputObserver.observe(msgInputElement, { attributes: true, childList: true, characterData: true, subtree: true });
+}, 1500);
