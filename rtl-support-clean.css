@@ -1,0 +1,21 @@
+
+.slack-rtl, .slack-rtl .ql-editor {
+	direction: rtl !important;
+	text-align: right !important;
+}
+
+.slack-ltr {
+	text-align: left !important;
+}
+
+.message_content_header {
+	text-align: left;
+}
+
+
+.day_msgs {
+	float: right !important;
+	width: 100%;
+}
+
+
