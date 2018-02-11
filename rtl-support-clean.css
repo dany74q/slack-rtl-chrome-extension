@@ -1,4 +1,8 @@
-
+span.c-message__body {
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: plaintext;
+}
 .slack-rtl, .slack-rtl .ql-editor {
 	direction: rtl !important;
 	text-align: right !important;
